@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container ">
+    <h2 class="text-center my-5">
+
+        Welcome To Our Book's Area:
+    </h2>
+   <div class="row">
+    {% for book in books %}
+  <div class="col-sm-6 mb-3 mb-sm-0">
+    <div class="card">
+      <div class="card-body bg-light">
+        <h5 class="card-title text-primary">Book Title:= {{book.Title}}</h5>
+        <p class="card-text">Book ID:= {{book.id}}</p>
+        <p class="card-text">Book Author:= {{book.Author}}</p>
+        <p class="card-text">Book Category:= {{book.Category}}</p>
+        <p class="card-text">Book Quantity:= {{book.Quantity}}</p>
+        
+      </div>
+    </div>
+  </div>
+
+  {% endfor %}
+  
+    
+
+
+{% endblock %}

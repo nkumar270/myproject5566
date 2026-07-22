@@ -1,0 +1,38 @@
+{% extends "base1.html" %}
+
+{% block content %}
+
+<h1 class="text-center mt-5">Login as Student!</h1>
+
+
+    <div class="container w-50 p-3 border bg-light rounded-3 mt-5">
+    <form method="POST" action="{{url_for('student_login')}}">
+  <div class="mb-3" action="{{url_for('student_login')}}">
+    <label for="exampleInputEmail1" class="form-label">Email address</label>
+    <input type="email" class="form-control" name="email" aria-describedby="emailHelp">
+  </div>
+  <div class="mb-3">
+    <label for="exampleInputPassword1" class="form-label">Password</label>
+    <input type="password" class="form-control" name="password">
+  </div>
+  <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+</div>
+<p class="text-center mt-5">Dont have a account ? <a href="/student">Register here</a></p>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+
+    {% for message in messages %}
+    <div class="container w-50">
+          <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{message}} 
+         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+     </div>
+    {% endfor %}
+  
+  {% endif %}
+{% endwith %}
+
+{% endblock %}

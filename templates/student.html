@@ -1,0 +1,41 @@
+{% extends "base1.html" %}
+
+
+{% block content %}
+
+<div class="container mt-'5'">
+<form class="row g-3" method="POST" enctype="multipart/form-data" action="{{url_for('student')}}">
+
+    <div class="col-md-6">
+    <label for="inputRoll_no" class="form-label">Enter Roll_no</label>
+    <input type="number" class="form-control" name="Roll_no">
+  </div>
+
+  <div class="col-md-6">
+    <label for="inputName" class="form-label">Enter Name</label>
+    <input type="text" class="form-control" name="name">
+  </div>
+  <div class="col-md-6">
+    <label for="inputEmail" class="form-label">Enter email</label>
+    <input type="email" class="form-control" name="email">
+  </div>
+  <div class="col-md-6">
+    <label for="inputEmail" class="form-label">Enter Password</label>
+    <input type="password" class="form-control" name="password">
+  </div>
+
+  <div class="col-12">
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" name="is_Active">
+      <label class="form-check-label" for="gridCheck">
+        Active or not
+      </label>
+    </div>
+  </div>
+  <div class="col-12">
+    <button type="submit" class="btn btn-primary">Sign in</button>
+  </div>
+</form>
+</div>
+
+{% endblock %}
