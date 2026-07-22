@@ -61,10 +61,11 @@ class IssueBook(db.Model):
    student_id=db.Column(db.Integer, ForeignKey('student.id'), nullable=False)
    book_id=db.Column(db.Integer, ForeignKey('book.id'), nullable=False)
    issue_date=db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+   return_date=db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+   penalty=db.Column(db.Float, default=0.0)
    
    def __repr__(self):
     return f"IssueBook {self.name}"
-   
 with library.app_context():
    db.create_all()
 
@@ -149,7 +150,7 @@ def registerlib():
       db.session.add(new_user)
       db.session.commit()
       flash("Account Created :")
-      return redirect(url_for("loginlib.html"))
+      return redirect(url_for("loginlib"))
    
    return render_template("registerlib.html")
 
@@ -253,6 +254,36 @@ def home1():
    username = request.args.get("username", "Guest")
    return render_template("home1.html",name=username)
 
+
+@library.route("/Issue", methods=["GET","POST"])
+def issue():
+   if request.method =="POST":
+        student_id = request.form.get("student_id")
+        book_id = request.form.get("book_id")
+        student = Student.query.get(student_id)
+        if not student:
+            return redirect(url_for("issue"))
+        book = Book.query.get(book_id)
+        if not book:
+            return redirect(url_for("issue"))
+        if book.Quantity <= 0:
+            return redirect(url_for("issue"))
+        issue = IssueBook(student_id=student.id,book_id=book.id,issue_date=datetime.today())
+        book.Quantity -= 1
+
+        db.session.add(issue)
+        db.session.commit()
+        return redirect(url_for("issue"))
+
+   students = Student.query.all()
+   books = Book.query.filter(Book.Quantity > 0).all()
+
+   return render_template("issued.html",students=students,books=books)
+
+@library.route("/issued",methods=["GET","POST"])
+def issued():
+   issuebooks=IssueBook.query.all()
+   return render_template('issued.html', issuebooks=issuebooks)
 
 if __name__=="__main__":
  library.run(debug=True, use_reloader=True)

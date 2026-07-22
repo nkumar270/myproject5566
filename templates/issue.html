@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1 class="text-center mt-5">Issue Book!</h1>
+
+
+    <div class="container w-50 p-3 border bg-light rounded-3 mt-5">
+    <form method="POST" action="{{url_for('issue')}}">
+
+
+    <div class="mb-3">
+    <label for="exampleInputPassword1" class="form-label">Enter Student ID</label>
+    <input type="number" class="form-control" name="student_id">
+  </div>
+  <div class="mb-3">
+    <label for="exampleInputPassword1" class="form-label">Enter Book Id</label>
+    <input type="number" class="form-control" name="book_id">
+  </div>
+  <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+</div>
+
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container ">
+    <h2 class="text-center my-5">
+
+        Check Out Your issued Book's:
+    </h2>
+   <div class="row">
+    {% for issuebook in issuebooks %}
+  <div class="col-sm-6 mb-3 mb-sm-0">
+    <div class="card">
+      <div class="card-body bg-light">
+        <h5 class="card-title text-primary">Issuebook Id:= {{issuebook.id}}</h5>
+        <p class="card-text">Book ID:= {{issuebook.book_id}}</p>
+        <p class="card-text">Student ID:= {{issuebook.student_id}}</p>
+        <p class="card-text">Issue Date:= {{issuebook.issue_date}}</p>
+        <p class="card-text">Return Date:= {{issuebook.return_date}}</p>
+        <p class="card-text">Penalty:= {{issuebook.penalty}}</p>  
+      </div>
+    </div>
+  </div>
+{% endfor %}
+  
+{% endblock %}
