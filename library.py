@@ -16,7 +16,7 @@ library.config['MAIL_PORT'] = 587
 library.config['MAIL_USE_TLS'] = True
 library.config['MAIL_USE_SSL'] = False
 library.config['MAIL_USERNAME'] = 'nkumarv868@gmail.com'
-library.config['MAIL_PASSWORD'] = 'ittm thnx gltp zmoo'
+library.config['MAIL_PASSWORD'] = 'glhp fyqp vhyu swij'
 library.config['MAIL_DEFAULT_SENDER'] = 'nkumarv868@gmail.com'
 
 mail = Mail(library)
@@ -347,7 +347,7 @@ def forgot_password():
       user=users.query.filter_by(email=form_email).first()
       if user:
 
-         msg = Message("Password Reset Request", recipients=[form_email])
+         msg = Message("Password Reset Request", sender=["By Nk"] ,recipients=[form_email])
          msg.body=f"Hello {user.name}.\n\nYou requested a password reset. Uou new password is: 123 \n\nPlease keep it Secure."
          
          mail.send(msg)
@@ -365,7 +365,6 @@ def forgot_password():
          return redirect(url_for("login"))
       
    return render_template("login.html")
-
 
 
 
