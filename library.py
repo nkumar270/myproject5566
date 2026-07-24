@@ -1,10 +1,26 @@
 from flask import Flask, render_template, redirect,request,flash,url_for
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+from datetime import datetime, timedelta
 import pytz
+import os
 from sqlalchemy import ForeignKey
+from flask_mail import Mail, Message 
 
 library=Flask(__name__,static_folder="static",static_url_path="/static")
+
+
+
+library = Flask(__name__)
+library.config['MAIL_SERVER'] = 'smtp.gmail.com'
+library.config['MAIL_PORT'] = 587
+library.config['MAIL_USE_TLS'] = True
+library.config['MAIL_USE_SSL'] = False
+library.config['MAIL_USERNAME'] = 'nkumarv868@gmail.com'
+library.config['MAIL_PASSWORD'] = 'ittm thnx gltp zmoo'
+library.config['MAIL_DEFAULT_SENDER'] = 'nkumarv868@gmail.com'
+
+mail = Mail(library)
+
 
 library.config["SQLALCHEMY_DATABASE_URI"]="sqlite:///data.db"
 library.config["SQLALCHEMY_TRACK-MODIFICATIONS"]=False
@@ -61,15 +77,16 @@ class IssueBook(db.Model):
    student_id=db.Column(db.Integer, ForeignKey('student.id'), nullable=False)
    book_id=db.Column(db.Integer, ForeignKey('book.id'), nullable=False)
    issue_date=db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-   return_date=db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+   return_date=db.Column(db.DateTime, nullable=True)
    penalty=db.Column(db.Float, default=0.0)
    
    def __repr__(self):
-    return f"IssueBook {self.name}"
+    return f"IssueBook  {self.name}"
 with library.app_context():
    db.create_all()
 
 
+@library.route("/send_email")
 
 @library.route("/index")
 def index():
@@ -255,35 +272,102 @@ def home1():
    return render_template("home1.html",name=username)
 
 
-@library.route("/Issue", methods=["GET","POST"])
-def issue():
+@library.route("/Issue_book", methods=["GET","POST"])
+def Issue_book():
    if request.method =="POST":
         student_id = request.form.get("student_id")
         book_id = request.form.get("book_id")
         student = Student.query.get(student_id)
         if not student:
-            return redirect(url_for("issue"))
+            return redirect(url_for("Issue_book"))
         book = Book.query.get(book_id)
         if not book:
-            return redirect(url_for("issue"))
+            return redirect(url_for("Issue_book"))
         if book.Quantity <= 0:
-            return redirect(url_for("issue"))
+            return redirect(url_for("Issue_book"))
         issue = IssueBook(student_id=student.id,book_id=book.id,issue_date=datetime.today())
         book.Quantity -= 1
 
         db.session.add(issue)
         db.session.commit()
-        return redirect(url_for("issue"))
+        return redirect(url_for("Issue_book"))
 
    students = Student.query.all()
    books = Book.query.filter(Book.Quantity > 0).all()
 
-   return render_template("issued.html",students=students,books=books)
+   return render_template("issue.html",students=students,books=books)
 
 @library.route("/issued",methods=["GET","POST"])
 def issued():
    issuebooks=IssueBook.query.all()
    return render_template('issued.html', issuebooks=issuebooks)
+
+@library.route("/return_book", methods=["GET","POST"])
+def return_book():
+   if request.method=="POST":
+      student_id = request.form.get("student_id")
+      book_id= request.form.get("book_id")
+      student= Student.query.get(student_id)
+      book = Book.query.get(book_id)
+      if not student or not book:
+         return redirect(url_for("return_book"))
+      issue= IssueBook.query.filter_by(student_id=student.id, book_id=book.id).first()
+      if not issue:
+         return redirect(url_for("return_book"))
+      book.Quantity +=1
+
+      allowed_days = 15
+      issue.return_date= datetime.now()
+      days=(issue.return_date - issue.issue_date).days
+
+      if days > allowed_days:
+         issue.penalty=(days-allowed_days)*5
+      else: 
+         issue.penalty=0
+      if issue.penalty==0:
+         db.session.delete(issue)
+         db.session.commit()
+      else:
+         flash("Pay your penalty first")
+
+      return redirect(url_for("return_book"))
+   
+   return render_template("return.html")
+
+@library.route("/view_student", methods=["GET","POST"])
+def view_student():
+   students=Student.query.all()
+   return render_template('view_student.html', students=students)
+
+@library.route("/forgot_password", methods=["GET","POST"])
+def forgot_password():
+   if request.method=="POST":
+      form_email = request.form.get("email")
+      print(form_email)
+      user=users.query.filter_by(email=form_email).first()
+      if user:
+
+         msg = Message("Password Reset Request", recipients=[form_email])
+         msg.body=f"Hello {user.name}.\n\nYou requested a password reset. Uou new password is: 123 \n\nPlease keep it Secure."
+         
+         mail.send(msg)
+         print("mail is sent to you :")
+         password="123"
+         user.password = password
+         db.session.commit()
+
+
+         flash("Password reset email sent :")
+         return redirect(url_for("login"))
+      else:
+         print("Email not found :")
+         flash("Email not found :")
+         return redirect(url_for("login"))
+      
+   return render_template("login.html")
+
+
+
 
 if __name__=="__main__":
  library.run(debug=True, use_reloader=True)

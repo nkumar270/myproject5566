@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+ <div class="container ">
+    <h2 class="text-center my-5">
+     Students Who's Login in Library :
+    </h2>
+   <div class="row">
+  {% for student in students %}
+  <div class="col-sm-6 mb-3 mb-sm-0">
+    <div class="card">
+      <div class="card-body bg-light">
+        <h5 class="card-title text-primary">Student ID:= {{student.id}}</h5>
+        <p class="card-text">Student Roll_no:= {{student.Roll_no}}</p>
+        <p class="card-text">Student Email:= {{student.email}}</p>
+        <p class="card-text">Student Password:= {{student.password}}</p>
+        <p class="card-text">Student Active Or not:= {{student.is_active}}</p>
+      </div>
+    </div>
+ </div>
+  {% endfor %}
+
+{% endblock %}

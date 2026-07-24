@@ -1,12 +1,14 @@
 {% extends "base.html" %}
 
+
 {% block content %}
 
-<h1 class="text-center mt-5">Issue Book!</h1>
+
+<h1 class="text-center mt-5">Return Book!</h1>
 
 
     <div class="container w-50 p-3 border bg-light rounded-3 mt-5">
-    <form method="POST" action="{{url_for('Issue_book')}}">
+    <form method="POST" action="{{url_for('return_book')}}">
 
 
     <div class="mb-3">
@@ -21,4 +23,19 @@
 </form>
 </div>
 
-{% endblock %}
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+
+    {% for message in messages %}
+    <div class="container w-50">
+          <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{message}} 
+         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+     </div>
+    {% endfor %}
+  
+  {% endif %}
+{% endwith %}
+
+{% endblock %}  
