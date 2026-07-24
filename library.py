@@ -5,27 +5,30 @@ import pytz
 import os
 from sqlalchemy import ForeignKey
 from flask_mail import Mail, Message 
+from dotenv import load_dotenv
+
+load_dotenv()
 
 library=Flask(__name__,static_folder="static",static_url_path="/static")
 
 
 
 library = Flask(__name__)
-library.config['MAIL_SERVER'] = 'smtp.gmail.com'
-library.config['MAIL_PORT'] = 587
-library.config['MAIL_USE_TLS'] = True
-library.config['MAIL_USE_SSL'] = False
-library.config['MAIL_USERNAME'] = 'nkumarv868@gmail.com'
-library.config['MAIL_PASSWORD'] = 'glhp fyqp vhyu swij'
-library.config['MAIL_DEFAULT_SENDER'] = 'nkumarv868@gmail.com'
+library.config['MAIL_SERVER'] = os.getenv("MAIL_SERVER")
+library.config['MAIL_PORT'] = os.getenv("MIAL_PORT")
+library.config['MAIL_USE_TLS'] = os.getenv("MAIL_USE_TLS")=="True"
+library.config['MAIL_USE_SSL'] = os.getenv("MAIL_USE_SSL")=="True"
+library.config['MAIL_USERNAME'] = os.getenv("MAIL_USERNAME")
+library.config['MAIL_PASSWORD'] = os.getenv("MAIL_PASSWORD")
+library.config['MAIL_DEFAULT_SENDER'] = os.getenv("MAIL_DEFAULT_SENDER")
 
 mail = Mail(library)
 
 
-library.config["SQLALCHEMY_DATABASE_URI"]="sqlite:///data.db"
+library.config["SQLALCHEMY_DATABASE_URI"]= os.getenv("DATABASE_URL")
 library.config["SQLALCHEMY_TRACK-MODIFICATIONS"]=False
 
-library.secret_key = "1234"
+library.secret_key = os.getenv("SECRET_KEY")
 
 
 db= SQLAlchemy(library)
