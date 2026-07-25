@@ -11,9 +11,6 @@ load_dotenv()
 
 library=Flask(__name__,static_folder="static",static_url_path="/static")
 
-
-
-library = Flask(__name__)
 library.config['MAIL_SERVER'] = os.getenv("MAIL_SERVER")
 library.config['MAIL_PORT'] = os.getenv("MAIL_PORT")
 library.config['MAIL_USE_TLS'] = os.getenv("MAIL_USE_TLS")=="True"
