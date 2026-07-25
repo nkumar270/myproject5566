@@ -12,7 +12,7 @@ load_dotenv()
 library=Flask(__name__,static_folder="static",static_url_path="/static")
 
 library.config['MAIL_SERVER'] = os.getenv("MAIL_SERVER")
-library.config['MAIL_PORT'] = os.getenv("MAIL_PORT")
+library.config['MAIL_PORT'] = int(os.getenv("MAIL_PORT",587))
 library.config['MAIL_USE_TLS'] = os.getenv("MAIL_USE_TLS")=="True"
 library.config['MAIL_USE_SSL'] = os.getenv("MAIL_USE_SSL")=="True"
 library.config['MAIL_USERNAME'] = os.getenv("MAIL_USERNAME")
@@ -23,7 +23,7 @@ mail = Mail(library)
 
 
 library.config["SQLALCHEMY_DATABASE_URI"]= os.getenv("DATABASE_URL")
-library.config["SQLALCHEMY_TRACK-MODIFICATIONS"]=False
+library.config["SQLALCHEMY_TRACK_MODIFICATIONS"]=False
 
 library.secret_key = os.getenv("SECRET_KEY")
 
