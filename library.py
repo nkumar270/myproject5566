@@ -15,7 +15,7 @@ library=Flask(__name__,static_folder="static",static_url_path="/static")
 
 library = Flask(__name__)
 library.config['MAIL_SERVER'] = os.getenv("MAIL_SERVER")
-library.config['MAIL_PORT'] = os.getenv("MIAL_PORT")
+library.config['MAIL_PORT'] = os.getenv("MAIL_PORT")
 library.config['MAIL_USE_TLS'] = os.getenv("MAIL_USE_TLS")=="True"
 library.config['MAIL_USE_SSL'] = os.getenv("MAIL_USE_SSL")=="True"
 library.config['MAIL_USERNAME'] = os.getenv("MAIL_USERNAME")
