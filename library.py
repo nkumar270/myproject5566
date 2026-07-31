@@ -22,10 +22,10 @@ library.config['MAIL_DEFAULT_SENDER'] = os.getenv("MAIL_DEFAULT_SENDER")
 mail = Mail(library)
 
 
-library.config["SQLALCHEMY_DATABASE_URI"]= os.getenv("DATABASE_URL")
+library.config["SQLALCHEMY_DATABASE_URI"]= os.getenv("DATABASE_URL") or "sqlite:///library.db"
 library.config["SQLALCHEMY_TRACK_MODIFICATIONS"]=False
 
-library.secret_key = os.getenv("SECRET_KEY")
+library.secret_key = os.getenv("SECRET_KEY") or "super-secret-key"
 
 
 db= SQLAlchemy(library)
@@ -53,10 +53,10 @@ class Book(db.Model):
    Category=db.Column(db.String(50),nullable=False) 
    Author=db.Column(db.String(50),nullable=False) 
    Quantity=db.Column(db.Integer)
-   issues= db.relationship('IssueBook', backref='user', lazy=True) 
+   issues= db.relationship('IssueBook', backref='book', lazy=True)
 
    def __repr__(self):
-      return f"Book {self.name}"
+      return f"Book {self.Title}"
 
 class Student(db.Model):
    __tablename__="student"
@@ -66,7 +66,7 @@ class Student(db.Model):
    email=db.Column(db.String(120),unique=True)
    password=db.Column(db.String(50), nullable=False)
    is_active=db.Column(db.Boolean,default=True)
-   issues= db.relationship('IssueBook', backref='Book', lazy=True)
+   issues= db.relationship('IssueBook', backref='student', lazy=True)
    
    def __repr__(self):
     return f"Student {self.name}"
@@ -81,7 +81,7 @@ class IssueBook(db.Model):
    penalty=db.Column(db.Float, default=0.0)
    
    def __repr__(self):
-    return f"IssueBook  {self.name}"
+    return f"IssueBook {self.id}"
 with library.app_context():
    db.create_all()
 
@@ -285,7 +285,7 @@ def Issue_book():
             return redirect(url_for("Issue_book"))
         if book.Quantity <= 0:
             return redirect(url_for("Issue_book"))
-        issue = IssueBook(student_id=student.id,book_id=book.id,issue_date=datetime.today())
+        issue = IssueBook(student_id=student.id,book_id=book.id,issue_date=datetime.utcnow())
         book.Quantity -= 1
 
         db.session.add(issue)
@@ -317,7 +317,7 @@ def return_book():
       book.Quantity +=1
 
       allowed_days = 15
-      issue.return_date= datetime.now()
+      issue.return_date= datetime.utcnow()
       days=(issue.return_date - issue.issue_date).days
 
       if days > allowed_days:
@@ -328,6 +328,7 @@ def return_book():
          db.session.delete(issue)
          db.session.commit()
       else:
+         db.session.commit()
          flash("Pay your penalty first")
 
       return redirect(url_for("return_book"))
