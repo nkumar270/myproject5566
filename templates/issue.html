@@ -4,21 +4,83 @@
 
 <h1 class="text-center mt-5">Issue Book!</h1>
 
+<div class="container mt-5">
+  <div class="row">
+    <!-- Issue Book Form -->
+    <div class="col-md-4">
+      <div class="p-3 border bg-light rounded-3">
+        <form method="POST" action="{{url_for('Issue_book')}}">
+          <div class="mb-3">
+            <label class="form-label">Enter Student ID</label>
+            <input type="number" class="form-control" name="student_id" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Enter Book ID</label>
+            <input type="number" class="form-control" name="book_id" required>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Submit</button>
+        </form>
+      </div>
+    </div>
 
-    <div class="container w-50 p-3 border bg-light rounded-3 mt-5">
-    <form method="POST" action="{{url_for('Issue_book')}}">
+    <!-- Active Students List -->
+    <div class="col-md-4">
+      <div class="p-3 border bg-light rounded-3" style="max-height: 400px; overflow-y: auto;">
+        <h5 class="text-center mb-3">Active Students</h5>
+        <table class="table table-striped table-sm">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Roll No</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for student in students %}
+            <tr>
+              <td>{{ student.id }}</td>
+              <td>{{ student.name }}</td>
+              <td>{{ student.Roll_no }}</td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="3" class="text-center">No students found</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
 
-
-    <div class="mb-3">
-    <label for="exampleInputPassword1" class="form-label">Enter Student ID</label>
-    <input type="number" class="form-control" name="student_id">
+    <!-- Available Books List -->
+    <div class="col-md-4">
+      <div class="p-3 border bg-light rounded-3" style="max-height: 400px; overflow-y: auto;">
+        <h5 class="text-center mb-3">Available Books</h5>
+        <table class="table table-striped table-sm">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Title</th>
+              <th>Qty</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for book in books %}
+            <tr>
+              <td>{{ book.id }}</td>
+              <td>{{ book.Title }}</td>
+              <td>{{ book.Quantity }}</td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="3" class="text-center">No books available</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
-  <div class="mb-3">
-    <label for="exampleInputPassword1" class="form-label">Enter Book Id</label>
-    <input type="number" class="form-control" name="book_id">
-  </div>
-  <button type="submit" class="btn btn-primary">Submit</button>
-</form>
 </div>
 
 {% endblock %}

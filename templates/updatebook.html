@@ -9,8 +9,8 @@
     <form method="POST" action="{{ url_for('update_book', id=book.id) }}">
 
         <div class="mb-3">
-    <label for="exampleInputTitle" class="form-label">Enter Id of Book</label>
-    <input type="nnumber" class="form-control" name="id">
+    <label for="exampleInputTitle" class="form-label">Book ID</label>
+    <input type="number" class="form-control" name="id" value="{{book.id}}" readonly>
   </div>
 
     <div class="mb-3">

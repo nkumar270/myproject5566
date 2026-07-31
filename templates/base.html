@@ -16,24 +16,22 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item">
-          <a class="nav-link"  href="login">Login</a>
+          <a class="nav-link" href="{{ url_for('login') }}">Login</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="Issue_book">Issue_Book</a>
+          <a class="nav-link" href="{{ url_for('Issue_book') }}">Issue_Book</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="view_student">View Student</a>
+          <a class="nav-link" href="{{ url_for('view_student') }}">View Student</a>
         </li>
        <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             Manage Book,s
           </a>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="view">View Books</a></li>
-            <li><a class="dropdown-item" href="addbook">Add new Books</a></li>
-            <li><a class="dropdown-item" href="issued">Issued Books</a></li>
-            <li><a class="dropdown-item" href="/update_book/int:id">update Books</a></li>
-            <li><a class="dropdown-item" href="/delete_book/int:id">Delete Books</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('view_book') }}">View Books</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('addbook') }}">Add new Books</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('issued') }}">Issued Books</a></li>
             <li><hr class="dropdown-divider"></li>
           </ul>
         </li>
