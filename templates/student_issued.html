@@ -1,0 +1,82 @@
+{% extends "base1.html" %}
+
+{% block content %}
+<div class="container bg-light p-4 rounded mt-5">
+    <h2 class="text-center mb-4">My Issued Books & Penalties</h2>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-info alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Issue ID</th>
+                    <th>Book Title</th>
+                    <th>Issue Date</th>
+                    <th>Return Date</th>
+                    <th>Penalty Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for issue in issues %}
+                <tr>
+                    <td>{{ issue.id }}</td>
+                    <td>{{ issue.book.Title }}</td>
+                    <td>{{ issue.issue_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>
+                        {% if issue.return_date %}
+                            {{ issue.return_date.strftime('%Y-%m-%d %H:%M') }}
+                        {% else %}
+                            <span class="text-warning">Not Returned Yet</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if issue.return_date %}
+                            {% if issue.penalty > 0 %}
+                                <span class="badge bg-danger">Penalty: {{ issue.penalty }}</span>
+                            {% else %}
+                                <span class="badge bg-success">No Penalty</span>
+                            {% endif %}
+                        {% else %}
+                            {% set est = estimated_penalties.get(issue.id, 0) %}
+                            {% if est > 0 %}
+                                <span class="badge bg-warning text-dark">Est. Penalty: {{ est }}</span>
+                            {% else %}
+                                <span class="badge bg-secondary">No Penalty (Within 15 days)</span>
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if not issue.return_date %}
+                            <form action="{{ url_for('student_return_book', issue_id=issue.id) }}" method="POST" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-primary">Return Book</button>
+                            </form>
+                        {% elif issue.penalty > 0 %}
+                            <form action="{{ url_for('student_pay_penalty', issue_id=issue.id) }}" method="POST" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-danger">Pay Penalty</button>
+                            </form>
+                        {% else %}
+                            <span class="text-success">Completed</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-4">You have no issued books at the moment.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

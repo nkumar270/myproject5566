@@ -192,5 +192,72 @@ class TestLibraryApp(unittest.TestCase):
             # Allowed days: 15. Late by 5 days. Penalty rate: 5 per day. Expected penalty: 25.
             self.assertEqual(issue.penalty, 25.0)
 
+    def test_student_module_login_logout_and_return_book(self):
+        """Verify student session login, logout, dynamic penalty viewing, return, and penalty payment."""
+        with library.app_context():
+            b = Book(Title="Frankenstein", Category="Sci-Fi", Author="Mary Shelley", Quantity=1)
+            s = Student(Roll_no=303, name="Student User", email="student@example.com", password="pwd")
+            db.session.add_all([b, s])
+            db.session.commit()
+            book_id = b.id
+            student_id = s.id
+
+        # 1. Try to view student issued books without login
+        response = self.app.get('/student_issued', follow_redirects=True)
+        self.assertIn(b"Please login first", response.data)
+
+        # 2. Login successfully
+        response_login = self.app.post('/student_login', data={
+            "email": "student@example.com",
+            "password": "pwd"
+        }, follow_redirects=True)
+        self.assertIn(b"Login Successful", response_login.data)
+        self.assertIn(b"Welcome to our Library as Student", response_login.data)
+
+        # 3. Issue a book to this student using the main Issue_book route
+        with library.app_context():
+            issue = IssueBook(student_id=student_id, book_id=book_id, issue_date=datetime.utcnow() - timedelta(days=20))
+            db.session.add(issue)
+            db.session.commit()
+            issue_id = issue.id
+
+        # 4. View student issued list with estimated penalty
+        response_issued = self.app.get('/student_issued')
+        self.assertEqual(response_issued.status_code, 200)
+        self.assertIn(b"Est. Penalty: 25", response_issued.data)
+        self.assertIn(b"Return Book", response_issued.data)
+
+        # 5. Return book via student module return route
+        response_return = self.app.post(f'/student_return_book/{issue_id}', follow_redirects=True)
+        self.assertIn(b"Book returned! Please pay your penalty of 25.0", response_return.data)
+
+        with library.app_context():
+            # Check book quantity is incremented
+            retrieved_book = Book.query.get(book_id)
+            self.assertEqual(retrieved_book.Quantity, 2)
+
+            # Issue book should record return date and exact penalty
+            retrieved_issue = IssueBook.query.get(issue_id)
+            self.assertIsNotNone(retrieved_issue)
+            self.assertIsNotNone(retrieved_issue.return_date)
+            self.assertEqual(retrieved_issue.penalty, 25.0)
+
+        # 6. Verify "Pay Penalty" button is visible
+        response_issued_post_return = self.app.get('/student_issued')
+        self.assertIn(b"Pay Penalty", response_issued_post_return.data)
+
+        # 7. Pay Penalty via student module pay penalty route
+        response_pay = self.app.post(f'/student_pay_penalty/{issue_id}', follow_redirects=True)
+        self.assertIn(b"Penalty paid successfully!", response_pay.data)
+
+        with library.app_context():
+            # Issue book should be deleted after penalty payment
+            retrieved_issue = IssueBook.query.get(issue_id)
+            self.assertIsNone(retrieved_issue)
+
+        # 8. Logout
+        response_logout = self.app.get('/student_logout', follow_redirects=True)
+        self.assertIn(b"Logged out successfully", response_logout.data)
+
 if __name__ == '__main__':
     unittest.main()

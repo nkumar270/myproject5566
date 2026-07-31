@@ -19,14 +19,20 @@
           <a class="nav-link active" aria-current="page" href="{{ url_for('login') }}">Login</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{{ url_for('issued') }}">Issued Books</a>
-        </li>
-        <li class="nav-item">
           <a class="nav-link" href="{{ url_for('view_book') }}">View Books</a>
         </li>
+        {% if session.get('student_id') %}
         <li class="nav-item">
-          <a class="nav-link" href="{{ url_for('return_book') }}">Return Books</a>
+          <a class="nav-link" href="{{ url_for('student_issued') }}">My Issued Books & Returns</a>
         </li>
+        <li class="nav-item">
+          <a class="nav-link text-danger" href="{{ url_for('student_logout') }}">Logout ({{ session.get('student_name') }})</a>
+        </li>
+        {% else %}
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('student_login') }}">Student Login</a>
+        </li>
+        {% endif %}
         <!--<li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             Dropdown

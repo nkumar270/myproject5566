@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect,request,flash,url_for
+from flask import Flask, render_template, redirect,request,flash,url_for,session
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
 import pytz
@@ -257,6 +257,8 @@ def student_login():
 
       current_user= Student.query.filter_by(email=form_email).first()
       if current_user and current_user.password== form_password:
+          session['student_id'] = current_user.id
+          session['student_name'] = current_user.name
           flash("Login Successful :")
           return redirect(url_for('home1',username=current_user.name))
        
@@ -264,6 +266,91 @@ def student_login():
       return redirect(url_for('student_login')) 
    else:  
       return render_template("student_login.html")
+
+@library.route("/student_logout")
+def student_logout():
+   session.pop('student_id', None)
+   session.pop('student_name', None)
+   flash("Logged out successfully.")
+   return redirect(url_for('student_login'))
+
+@library.route("/student_issued")
+def student_issued():
+    if 'student_id' not in session:
+        flash("Please login first.")
+        return redirect(url_for('student_login'))
+
+    student_id = session['student_id']
+    issues = IssueBook.query.filter_by(student_id=student_id).all()
+
+    # Compute estimated penalties dynamically for non-returned books
+    now = datetime.utcnow()
+    estimated_penalties = {}
+    for issue in issues:
+        if not issue.return_date:
+            days = (now - issue.issue_date).days
+            if days > 15:
+                estimated_penalties[issue.id] = (days - 15) * 5
+            else:
+                estimated_penalties[issue.id] = 0
+
+    return render_template("student_issued.html", issues=issues, estimated_penalties=estimated_penalties)
+
+@library.route("/student_return_book/<int:issue_id>", methods=["POST"])
+def student_return_book(issue_id):
+    if 'student_id' not in session:
+        flash("Please login first.")
+        return redirect(url_for('student_login'))
+
+    issue = IssueBook.query.get_or_404(issue_id)
+    if issue.student_id != session['student_id']:
+        flash("Unauthorized action.")
+        return redirect(url_for('student_issued'))
+
+    if issue.return_date:
+        flash("Book already returned.")
+        return redirect(url_for('student_issued'))
+
+    book = Book.query.get(issue.book_id)
+    if book:
+        book.Quantity += 1
+
+    issue.return_date = datetime.utcnow()
+    days = (issue.return_date - issue.issue_date).days
+    if days > 15:
+        issue.penalty = (days - 15) * 5
+    else:
+        issue.penalty = 0
+
+    if issue.penalty == 0:
+        db.session.delete(issue)
+        db.session.commit()
+        flash("Book returned successfully!")
+    else:
+        db.session.commit()
+        flash(f"Book returned! Please pay your penalty of {issue.penalty}.")
+
+    return redirect(url_for('student_issued'))
+
+@library.route("/student_pay_penalty/<int:issue_id>", methods=["POST"])
+def student_pay_penalty(issue_id):
+    if 'student_id' not in session:
+        flash("Please login first.")
+        return redirect(url_for('student_login'))
+
+    issue = IssueBook.query.get_or_404(issue_id)
+    if issue.student_id != session['student_id']:
+        flash("Unauthorized action.")
+        return redirect(url_for('student_issued'))
+
+    if not issue.return_date or issue.penalty <= 0:
+        flash("No active penalty to pay.")
+        return redirect(url_for('student_issued'))
+
+    db.session.delete(issue)
+    db.session.commit()
+    flash("Penalty paid successfully!")
+    return redirect(url_for('student_issued'))
 
 
 @library.route("/home1")
