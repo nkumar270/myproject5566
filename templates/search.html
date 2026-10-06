@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container my-5">
+    <h2 class="text-center mb-4">
+        Search Results {% if q %}for "{{ q }}"{% endif %}
+    </h2>
+
+    <div class="row">
+        <!-- Books Section -->
+        <div class="col-12 mb-4">
+            <h3>Books</h3>
+            {% if books %}
+                <div class="row">
+                {% for book in books %}
+                    <div class="col-sm-6 col-md-4 mb-3">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">Book Title: {{book.Title}}</h5>
+                                <p class="card-text">Book ID: {{book.id}}</p>
+                                <p class="card-text">Author: {{book.Author}}</p>
+                                <p class="card-text">Category: {{book.Category}}</p>
+                                <p class="card-text">Quantity: {{book.Quantity}}</p>
+                                <div class="mt-2">
+                                    <a href="{{ url_for('update_book', id=book.id) }}" class="btn btn-warning btn-sm me-1">Update</a>
+                                    <a href="{{ url_for('delete_book', id=book.id) }}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted">No matching books found.</p>
+            {% endif %}
+        </div>
+
+        <!-- Students Section -->
+        <div class="col-12 mb-4">
+            <h3>Students</h3>
+            {% if students %}
+                <div class="row">
+                {% for student in students %}
+                    <div class="col-sm-6 col-md-4 mb-3">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">{{student.name}}</h5>
+                                <p class="card-text">Student ID: {{student.id}}</p>
+                                <p class="card-text">Roll No: {{student.Roll_no}}</p>
+                                <p class="card-text">Email: {{student.email}}</p>
+                                <p class="card-text">Active: {{student.is_active}}</p>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted">No matching students found.</p>
+            {% endif %}
+        </div>
+
+        <!-- Issued Books Section -->
+        <div class="col-12 mb-4">
+            <h3>Issued Books</h3>
+            {% if issuebooks %}
+                <div class="row">
+                {% for issuebook in issuebooks %}
+                    <div class="col-sm-6 col-md-4 mb-3">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">Issue Record #{{issuebook.id}}</h5>
+                                <p class="card-text">Book Title: {{issuebook.book.Title}} (ID: {{issuebook.book_id}})</p>
+                                <p class="card-text">Student Name: {{issuebook.student.name}} (ID: {{issuebook.student_id}})</p>
+                                <p class="card-text">Issue Date: {{issuebook.issue_date}}</p>
+                                <p class="card-text">Return Date: {{issuebook.return_date or 'Not Returned'}}</p>
+                                <p class="card-text">Penalty: {{issuebook.penalty}}</p>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted">No matching issue records found.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

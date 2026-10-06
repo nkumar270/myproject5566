@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
 import pytz
 import os
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, or_
 from flask_mail import Mail, Message 
 from dotenv import load_dotenv
 
@@ -194,10 +194,63 @@ def addbook():
    
    return render_template("addbook.html")
 
+@library.route("/search", methods=["GET"])
+def search():
+   q = request.args.get("q", "").strip()
+   books = []
+   students = []
+   issuebooks = []
+   if q:
+      book_filter = or_(
+         Book.Title.ilike(f"%{q}%"),
+         Book.Category.ilike(f"%{q}%"),
+         Book.Author.ilike(f"%{q}%")
+      )
+      student_filter = or_(
+         Student.name.ilike(f"%{q}%"),
+         Student.email.ilike(f"%{q}%")
+      )
+      issue_filter = or_(
+         Book.Title.ilike(f"%{q}%"),
+         Book.Author.ilike(f"%{q}%"),
+         Student.name.ilike(f"%{q}%"),
+         Student.email.ilike(f"%{q}%")
+      )
+      if q.isdigit():
+         val = int(q)
+         book_filter = or_(book_filter, Book.id == val, Book.Quantity == val)
+         student_filter = or_(student_filter, Student.id == val, Student.Roll_no == val)
+         issue_filter = or_(issue_filter, IssueBook.id == val, IssueBook.book_id == val, IssueBook.student_id == val, Student.Roll_no == val)
+
+      books = Book.query.filter(book_filter).all()
+      students = Student.query.filter(student_filter).all()
+      issuebooks = IssueBook.query.join(Book).join(Student).filter(issue_filter).all()
+
+   return render_template("search.html", books=books, students=students, issuebooks=issuebooks, q=q)
+
+@library.before_request
+def handle_global_search():
+   if request.method == "GET":
+      q = request.args.get("q", "").strip()
+      if q and request.endpoint not in ["view_book", "view_student", "issued", "Issue_book", "search", "static"]:
+         return redirect(url_for("search", q=q))
+
 @library.route("/view", methods=["GET","POST"])
 def view_book():
-   books=Book.query.all()
-   return render_template("view.html",books=books)
+   q = request.args.get("q", "").strip()
+   if q:
+      book_filter = or_(
+         Book.Title.ilike(f"%{q}%"),
+         Book.Category.ilike(f"%{q}%"),
+         Book.Author.ilike(f"%{q}%")
+      )
+      if q.isdigit():
+         val = int(q)
+         book_filter = or_(book_filter, Book.id == val, Book.Quantity == val)
+      books = Book.query.filter(book_filter).all()
+   else:
+      books = Book.query.all()
+   return render_template("view.html", books=books, q=q)
 
 @library.route('/update_book/<int:id>', methods=["GET", "POST"])
 def update_book(id):
@@ -292,15 +345,47 @@ def Issue_book():
         db.session.commit()
         return redirect(url_for("Issue_book"))
 
-   students = Student.query.all()
-   books = Book.query.filter(Book.Quantity > 0).all()
+   q = request.args.get("q", "").strip()
+   if q:
+      student_filter = or_(
+         Student.name.ilike(f"%{q}%"),
+         Student.email.ilike(f"%{q}%")
+      )
+      book_filter = or_(
+         Book.Title.ilike(f"%{q}%"),
+         Book.Category.ilike(f"%{q}%"),
+         Book.Author.ilike(f"%{q}%")
+      )
+      if q.isdigit():
+         val = int(q)
+         student_filter = or_(student_filter, Student.id == val, Student.Roll_no == val)
+         book_filter = or_(book_filter, Book.id == val)
 
-   return render_template("issue.html",students=students,books=books)
+      students = Student.query.filter(student_filter).all()
+      books = Book.query.filter(Book.Quantity > 0, book_filter).all()
+   else:
+      students = Student.query.all()
+      books = Book.query.filter(Book.Quantity > 0).all()
+
+   return render_template("issue.html",students=students,books=books, q=q)
 
 @library.route("/issued",methods=["GET","POST"])
 def issued():
-   issuebooks=IssueBook.query.all()
-   return render_template('issued.html', issuebooks=issuebooks)
+   q = request.args.get("q", "").strip()
+   if q:
+      issue_filter = or_(
+         Book.Title.ilike(f"%{q}%"),
+         Book.Author.ilike(f"%{q}%"),
+         Student.name.ilike(f"%{q}%"),
+         Student.email.ilike(f"%{q}%")
+      )
+      if q.isdigit():
+         val = int(q)
+         issue_filter = or_(issue_filter, IssueBook.id == val, IssueBook.book_id == val, IssueBook.student_id == val, Student.Roll_no == val)
+      issuebooks = IssueBook.query.join(Book).join(Student).filter(issue_filter).all()
+   else:
+      issuebooks = IssueBook.query.all()
+   return render_template('issued.html', issuebooks=issuebooks, q=q)
 
 @library.route("/return_book", methods=["GET","POST"])
 def return_book():
@@ -337,8 +422,19 @@ def return_book():
 
 @library.route("/view_student", methods=["GET","POST"])
 def view_student():
-   students=Student.query.all()
-   return render_template('view_student.html', students=students)
+   q = request.args.get("q", "").strip()
+   if q:
+      student_filter = or_(
+         Student.name.ilike(f"%{q}%"),
+         Student.email.ilike(f"%{q}%")
+      )
+      if q.isdigit():
+         val = int(q)
+         student_filter = or_(student_filter, Student.id == val, Student.Roll_no == val)
+      students = Student.query.filter(student_filter).all()
+   else:
+      students = Student.query.all()
+   return render_template('view_student.html', students=students, q=q)
 
 @library.route("/forgot_password", methods=["GET","POST"])
 def forgot_password():

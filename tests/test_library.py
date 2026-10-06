@@ -192,5 +192,45 @@ class TestLibraryApp(unittest.TestCase):
             # Allowed days: 15. Late by 5 days. Penalty rate: 5 per day. Expected penalty: 25.
             self.assertEqual(issue.penalty, 25.0)
 
+    def test_search_functionality(self):
+        """Verify template-specific and global search capabilities."""
+        with library.app_context():
+            b1 = Book(Title="Python Basics", Category="Programming", Author="Guido", Quantity=5)
+            b2 = Book(Title="Java Advanced", Category="Programming", Author="James", Quantity=3)
+            s1 = Student(Roll_no=1001, name="Alice Smith", email="alice@test.com", password="pass")
+            s2 = Student(Roll_no=1002, name="Bob Jones", email="bob@test.com", password="pass")
+            db.session.add_all([b1, b2, s1, s2])
+            db.session.commit()
+
+            issue1 = IssueBook(student_id=s1.id, book_id=b1.id, issue_date=datetime.utcnow())
+            db.session.add(issue1)
+            db.session.commit()
+
+        # 1. Search books on /view
+        res = self.app.get('/view?q=Python')
+        self.assertIn(b"Python Basics", res.data)
+        self.assertNotIn(b"Java Advanced", res.data)
+
+        # 2. Search students on /view_student
+        res = self.app.get('/view_student?q=Alice')
+        self.assertIn(b"Alice Smith", res.data)
+        self.assertNotIn(b"Bob Jones", res.data)
+
+        # 3. Search issued books on /issued
+        res = self.app.get('/issued?q=Alice')
+        self.assertIn(b"Issuebook Id:=", res.data)
+
+        res_empty = self.app.get('/issued?q=Bob')
+        self.assertNotIn(b"Issuebook Id:=", res_empty.data)
+
+        # 4. Search on /Issue_book
+        res = self.app.get('/Issue_book?q=Java')
+        self.assertIn(b"Java Advanced", res.data)
+
+        # 5. Global search redirect from other pages (e.g., /home)
+        res_redirect = self.app.get('/?q=Python', follow_redirects=True)
+        self.assertIn(b"Search Results", res_redirect.data)
+        self.assertIn(b"Python Basics", res_redirect.data)
+
 if __name__ == '__main__':
     unittest.main()
