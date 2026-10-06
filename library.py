@@ -129,7 +129,7 @@ def login():
           flash("Login Successful :")
           return redirect(url_for('index'))
        
-       flash("Invalid credentails :")
+       flash("Invalid credentials :")
        return redirect(url_for('login')) 
    else:  
        return render_template("login.html")
