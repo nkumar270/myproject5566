@@ -199,6 +199,11 @@ def view_book():
    books=Book.query.all()
    return render_template("view.html",books=books)
 
+@library.route("/view1", methods=["GET","POST"])
+def view1_book():
+   books=Book.query.all()
+   return render_template("view1.html",books=books)
+
 @library.route('/update_book/<int:id>', methods=["GET", "POST"])
 def update_book(id):
     book = Book.query.get_or_404(id)
