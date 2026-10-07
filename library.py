@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect,request,flash,url_for
+from flask import Flask, render_template, redirect,request,flash,url_for,current_app
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
 import pytz
@@ -22,7 +22,7 @@ library.config['MAIL_DEFAULT_SENDER'] = os.getenv("MAIL_DEFAULT_SENDER")
 mail = Mail(library)
 
 
-library.config["SQLALCHEMY_DATABASE_URI"]= os.getenv("DATABASE_URL") or "sqlite:///library.db"
+library.config["SQLALCHEMY_DATABASE_URI"]= os.getenv("DATABASE_URL") or "sqlite:///data.db"
 library.config["SQLALCHEMY_TRACK_MODIFICATIONS"]=False
 
 library.secret_key = os.getenv("SECRET_KEY") or "super-secret-key"
@@ -103,7 +103,7 @@ def register():
       form_username = request.form.get("username")
       form_email = request.form.get("email")
       form_password = request.form.get("password")
-      print(form_email, form_password, form_username)
+      current_app.logger.info(f"{form_username} {form_email} {form_password}")
 
       new_user=users(
          email= form_email,
@@ -157,7 +157,7 @@ def registerlib():
       form_username = request.form.get("username")
       form_email = request.form.get("email")
       form_password = request.form.get("password")
-      print(form_email, form_password, form_username)
+      current_app.logger.info(f"{form_email} {form_password} {form_username}")
 
       new_user=librarian(
          email= form_email,
@@ -178,7 +178,7 @@ def addbook():
       form_Category=request.form.get("Category")
       form_Author=request.form.get("Author")
       form_Quantity=request.form.get("Quantity")
-      print(form_Title, form_Category, form_Author, form_Quantity)
+      current_app.logger.info(f"form_Title, form_Category, form_Author, form_Quantity")
 
       new_book=Book(
          Title=form_Title,
@@ -445,7 +445,7 @@ def view_student():
 def forgot_password():
    if request.method=="POST":
       form_email = request.form.get("email")
-      print(form_email)
+      curren_app.logger.info(f"{form_email}")
       user=users.query.filter_by(email=form_email).first()
       if user:
 
@@ -453,7 +453,7 @@ def forgot_password():
          msg.body=f"Hello {user.name}.\n\nYou requested a password reset. Uou new password is: 123 \n\nPlease keep it Secure."
          
          mail.send(msg)
-         print("mail is sent to you :")
+         current_app.logger.info(f"mail is sent to you :")
          password="123"
          user.password = password
          db.session.commit()
@@ -462,7 +462,7 @@ def forgot_password():
          flash("Password reset email sent :")
          return redirect(url_for("login"))
       else:
-         print("Email not found :")
+         current_app.logger.info(f"Email not found :")
          flash("Email not found :")
          return redirect(url_for("login"))
       
