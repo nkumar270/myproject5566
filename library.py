@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect,request,flash,url_for,current_app
+from flask import Flask, render_template, redirect,request,flash,url_for,current_app,session
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
 import pytz
@@ -88,11 +88,15 @@ with library.app_context():
 
 @library.route("/send_email")
 
+@library.route("/")
+def index1():
+   return render_template("index1.html")
+
 @library.route("/index")
 def index():
    return render_template("index.html")
 
-@library.route("/")
+@library.route("/home")
 def home():
      username = request.args.get("username", "Guest")
      return render_template("home.html",name=username)
@@ -468,6 +472,13 @@ def forgot_password():
       
    return render_template("login.html")
 
+
+@library.route("/logout", methods=["GET","POST"])
+def logout():
+   session.clear()
+
+   flash("You have been logged out: ")
+   return redirect(url_for('login'))
 
 if __name__=="__main__":
  library.run(debug=True, use_reloader=True)
