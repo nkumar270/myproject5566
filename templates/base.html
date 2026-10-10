@@ -16,10 +16,10 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item">
-          <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+          <a class="nav-link" href="{{ url_for('home') }}">Home</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{{ url_for('Issue_book') }}">Issue_Book</a>
+          <a class="nav-link" href="{{ url_for('index1') }}">Dashboard</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="{{ url_for('view_student') }}">View Student</a>
@@ -34,7 +34,8 @@
           <ul class="dropdown-menu">
             <li><a class="dropdown-item" href="{{ url_for('view_book') }}">View Books</a></li>
             <li><a class="dropdown-item" href="{{ url_for('addbook') }}">Add new Books</a></li>
-            <li><a class="dropdown-item" href="{{ url_for('issued') }}">Issued Books</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('Issue_book') }}">Issue Book</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('issued') }}">Issued Book</a></li>
             <li><hr class="dropdown-divider"></li>
           </ul>
         </li>

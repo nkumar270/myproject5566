@@ -35,6 +35,29 @@
   </button>
 </div>
 </div>
+<br>
+<br>
+<div class="card card-subtle theme-secondary" style="width: 18rem; margin-left: 30px;">
+  <div class="card-body">
+    <h4 class="card-title" style="color:rgb(255, 165, 0);">Available Books:</h4>
+    <div class="card-text">{{total_books}}</div>
+    <a href="view" class="btn-solid theme-primary" style="text-decoration: none;">click for View Books:</a>
+  </div>
+</div>
+<div class="card card-subtle theme-secondary" style="width: 18rem; margin-left: 350px; margin-top: -120px;">
+  <div class="card-body">
+    <h4 class="card-title" style="color:rgb(255, 165, 0);">Available Copies:</h4>
+    <div class="card-text">{{total_copies}}</div>
+    <a href="view" class="btn-solid theme-primary" style="text-decoration: none;">click for View Books:</a>
+  </div>
+</div>
+<div class="card card-subtle theme-secondary" style="width: 18rem; margin-left: 670px; margin-top: -120px;">
+  <div class="card-body">
+    <h4 class="card-title" style="color:rgb(255, 165, 0);">Available Students:</h4>
+    <div class="card-text">{{total_students}}</div>
+    <a href="view_student" class="btn-solid theme-primary" style="text-decoration: none;">click for View Students:</a>
+  </div>
+</div>
 
 {% with messages = get_flashed_messages() %}
   {% if messages %}

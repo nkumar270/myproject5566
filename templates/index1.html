@@ -35,6 +35,49 @@
   </button>
 </div>
 </div>
+<br>
+<br>
+<div class="card card-subtle theme-secondary" style="width: 18rem; margin-left: 30px;">
+  <div class="card-body">
+    <h4 class="card-title" style="color:rgb(255, 165, 0);">Available Books:</h4>
+    <div class="card-text">{{total_books}}</div>
+    <a href="view" class="btn-solid theme-primary" style="text-decoration: none;">click for View Books:</a>
+  </div>
+</div>
+<div class="card card-subtle theme-secondary" style="width: 18rem; margin-left: 350px; margin-top: -120px;">
+  <div class="card-body">
+    <h4 class="card-title" style="color:rgb(255, 165, 0);">Available Copies:</h4>
+    <div class="card-text">{{total_copies}}</div>
+    <a href="view" class="btn-solid theme-primary" style="text-decoration: none;">click for View Books:</a>
+  </div>
+</div>
+<div class="card card-subtle theme-secondary" style="width: 18rem; margin-left: 670px; margin-top: -120px;">
+  <div class="card-body">
+    <h4 class="card-title" style="color:rgb(255, 165, 0);">Available Students:</h4>
+    <div class="card-text">{{total_students}}</div>
+    <a href="view_student" class="btn-solid theme-primary" style="text-decoration: none;">click for View Students:</a>
+  </div>
+</div>
+<br><br><br><br>
+
+<div class="card" style="background-color: rgba(255,255,255,0.5);">
+  <div class="card-header"><b><i>
+    Description About Website</i></b>
+  </div>
+  <div class="card-body">
+    <figure>
+      <blockquote class="blockquote">
+        <p>Improving librarians and sttudents with a fast,reliable,and intuitive system :</p>
+      </blockquote>
+      <figcaption class="blockquote-footer"><b>
+        Contact Us: </b><cite title="Source Title">notherside@gmail.com...</cite>
+      </figcaption>
+      <figcaption class="blockquote-footer"><b>
+        Copyright :</b> <cite title="Source Title">@2026 Library Management System. All right reserved...</cite>
+      </figcaption>
+    </figure>
+  </div>
+</div>
 
 {% with messages = get_flashed_messages() %}
   {% if messages %}

@@ -16,10 +16,13 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="{{ url_for('login') }}">Login</a>
+          <a class="nav-link active" aria-current="page" href="{{ url_for('home1') }}">Home</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{{ url_for('issued') }}">Issued Books</a>
+          <a class="nav-link" href="{{ url_for('index1') }}">Dashboard</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('issued1') }}">Issued Books</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="{{ url_for('view1_book') }}">View Books</a>

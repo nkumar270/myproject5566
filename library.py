@@ -1,11 +1,12 @@
-from flask import Flask, render_template, redirect,request,flash,url_for,current_app,session
+from flask import Flask, render_template, redirect,request,flash,url_for, current_app, session
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
 import pytz
 import os
-from sqlalchemy import ForeignKey, or_
+from sqlalchemy import ForeignKey, or_, func
 from flask_mail import Mail, Message 
 from dotenv import load_dotenv
+
 
 load_dotenv()
 
@@ -90,7 +91,10 @@ with library.app_context():
 
 @library.route("/")
 def index1():
-   return render_template("index1.html")
+   total_books=Book.query.count()
+   total_copies=db.session.query(func.sum(Book.Quantity)).scalar()or 0
+   total_students=Student.query.count()
+   return render_template("index1.html", total_books=total_books, total_copies=total_copies, total_students=total_students)
 
 @library.route("/index")
 def index():
@@ -98,8 +102,11 @@ def index():
 
 @library.route("/home")
 def home():
+     total_books=Book.query.count()
+     total_copies=db.session.query(func.sum(Book.Quantity)).scalar()or 0
+     total_students=Student.query.count()
      username = request.args.get("username", "Guest")
-     return render_template("home.html",name=username)
+     return render_template("home.html",name=username, total_books=total_books, total_copies=total_copies, total_students=total_students)
 
 @library.route("/register", methods=["GET","POST"])
 def register():
@@ -330,8 +337,11 @@ def student_login():
 
 @library.route("/home1")
 def home1():
+   total_books=Book.query.count()
+   total_copies=db.session.query(func.sum(Book.Quantity)).scalar()or 0
+   total_issues=db.session.query(func.sum(Student.issues)).scalar()or 0
    username = request.args.get("username", "Guest")
-   return render_template("home1.html",name=username)
+   return render_template("home1.html",name=username, total_books=total_books, total_copies=total_copies, total_issues=total_issues)
 
 
 @library.route("/Issue_book", methods=["GET","POST"])
@@ -396,6 +406,24 @@ def issued():
       issuebooks = IssueBook.query.all()
    return render_template('issued.html', issuebooks=issuebooks, q=q)
 
+@library.route("/issued1",methods=["GET","POST"])
+def issued1():
+   q = request.args.get("q", "").strip()
+   if q:
+      issue_filter = or_(
+         Book.Title.ilike(f"%{q}%"),
+         Book.Author.ilike(f"%{q}%"),
+         Student.name.ilike(f"%{q}%"),
+         Student.email.ilike(f"%{q}%")
+      )
+      if q.isdigit():
+         val = int(q)
+         issue_filter = or_(issue_filter, IssueBook.id == val, IssueBook.book_id == val, IssueBook.student_id == val, Student.Roll_no == val)
+      issuebooks = IssueBook.query.join(Book).join(Student).filter(issue_filter).all()
+   else:
+      issuebooks = IssueBook.query.all()
+   return render_template('issued1.html', issuebooks=issuebooks, q=q)
+
 @library.route("/return_book", methods=["GET","POST"])
 def return_book():
    if request.method=="POST":
@@ -449,7 +477,6 @@ def view_student():
 def forgot_password():
    if request.method=="POST":
       form_email = request.form.get("email")
-      curren_app.logger.info(f"{form_email}")
       user=users.query.filter_by(email=form_email).first()
       if user:
 
