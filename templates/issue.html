@@ -83,4 +83,19 @@
   </div>
 </div>
 
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+
+    {% for message in messages %}
+    <div class="container w-50">
+          <div class="alert alert-primary alert-dismissible fade show" role="alert">
+        {{message}} 
+         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+     </div>
+    {% endfor %}
+  
+  {% endif %}
+{% endwith %}
+
 {% endblock %}

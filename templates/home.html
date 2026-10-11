@@ -37,7 +37,36 @@
 </div>
 <br>
 <br>
-<div class="card card-subtle theme-secondary" style="width: 18rem; margin-left: 30px;">
+<div class="row">
+  <div class="sm:col-6 mb-3 sm:mb-0" style="width: 400px; margin-left: 50px;">
+    <div class="card">
+      <div class="card-body">
+        <h4 class="card-title" style="color:rgb(255, 165, 0);">Available Books:</h4>
+        <p class="card-text">=>{{total_books}}</p>
+        <a href="view" class="btn-solid theme-primary" style="text-decoration: none;">Click for View Books:</a>
+      </div>
+    </div>
+  </div>
+  <div class="sm:col-6" style="width: 400px; margin-left: 50px;">
+    <div class="card">
+      <div class="card-body">
+        <h4 class="card-title" style="color:rgb(255, 165, 0);">Available Copies:</h4>
+        <p class="card-text">=>{{total_copies}}</p>
+        <a href="view" class="btn-solid theme-primary" style="text-decoration: none;">Click For View Books:</a>
+      </div>
+    </div>
+  </div>
+  <div class="sm:col-6" style="width: 400px; margin-left: 50px;">
+    <div class="card">
+      <div class="card-body">
+        <h4 class="card-title" style="color: rgb(255, 165, 0);">Available Students:</h4>
+        <p class="card-text">=>{{total_students}}</p>
+        <a href="view_student" class="btn-solid theme-primary" style="text-decoration: none;">View Students:</a>
+      </div>
+    </div>
+  </div>
+</div>
+<!--<div class="card card-subtle theme-secondary" style="width: 18rem; margin-left: 30px;">
   <div class="card-body">
     <h4 class="card-title" style="color:rgb(255, 165, 0);">Available Books:</h4>
     <div class="card-text">{{total_books}}</div>
@@ -57,7 +86,9 @@
     <div class="card-text">{{total_students}}</div>
     <a href="view_student" class="btn-solid theme-primary" style="text-decoration: none;">click for View Students:</a>
   </div>
-</div>
+</div>-->
+<br>
+
 
 {% with messages = get_flashed_messages() %}
   {% if messages %}

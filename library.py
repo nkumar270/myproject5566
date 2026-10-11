@@ -116,6 +116,10 @@ def register():
       form_password = request.form.get("password")
       current_app.logger.info(f"{form_username} {form_email} {form_password}")
 
+      existing_user=users.query.filter_by(email=form_email).first()
+      if existing_user:
+         flash("An Account With This Email is Existing :")
+         return render_template('register.html')
       new_user=users(
          email= form_email,
          password= form_password,
@@ -170,6 +174,10 @@ def registerlib():
       form_password = request.form.get("password")
       current_app.logger.info(f"{form_email} {form_password} {form_username}")
 
+      existing_user=librarian.query.filter_by(email=form_email).first()
+      if existing_user:
+         flash('User Exist with this Email :')
+         return render_template('registerlib.html')
       new_user=librarian(
          email= form_email,
          password= form_password,
@@ -191,6 +199,10 @@ def addbook():
       form_Quantity=request.form.get("Quantity")
       current_app.logger.info(f"form_Title, form_Category, form_Author, form_Quantity")
 
+      existing_book=Book.query.filter_by(Title=form_Title).first()
+      if existing_book:
+         flash('Book Is Exised Try Anouther :')
+         return render_template('addbook.html')
       new_book=Book(
          Title=form_Title,
          Category=form_Category,
@@ -303,7 +315,9 @@ def student():
       form_email = request.form.get("email")
       form_password = request.form.get("password")
       form_is_active = request.form.get("is_active")
-
+      existing_user=Student.query.filter_by(email=form_email).first()
+      if existing_user:
+         flash('Student Have a Account with This Email :')
       new_user=Student(
          Roll_no= form_Roll_no,
          name= form_name,
@@ -351,11 +365,14 @@ def Issue_book():
         book_id = request.form.get("book_id")
         student = Student.query.get(student_id)
         if not student:
+            flash('Book Is Not Issue On This Path :')
             return redirect(url_for("Issue_book"))
         book = Book.query.get(book_id)
         if not book:
+            flash('Book Is Not Issue On This Path :')
             return redirect(url_for("Issue_book"))
         if book.Quantity <= 0:
+            flash('Book Is Not Issue On This Path :')
             return redirect(url_for("Issue_book"))
         issue = IssueBook(student_id=student.id,book_id=book.id,issue_date=datetime.utcnow())
         book.Quantity -= 1
@@ -383,6 +400,7 @@ def Issue_book():
       students = Student.query.filter(student_filter).all()
       books = Book.query.filter(Book.Quantity > 0, book_filter).all()
    else:
+      flash('Book is Issued to Student :')
       students = Student.query.all()
       books = Book.query.filter(Book.Quantity > 0).all()
 
@@ -432,9 +450,11 @@ def return_book():
       student= Student.query.get(student_id)
       book = Book.query.get(book_id)
       if not student or not book:
+         flash('No Book Issued to Exixting Student :')
          return redirect(url_for("return_book"))
       issue= IssueBook.query.filter_by(student_id=student.id, book_id=book.id).first()
       if not issue:
+         flash('No Book is Issued to Existting Student :')
          return redirect(url_for("return_book"))
       book.Quantity +=1
 
@@ -447,6 +467,7 @@ def return_book():
       else: 
          issue.penalty=0
       if issue.penalty==0:
+         flash('Book Return Succesfully! :')
          db.session.delete(issue)
          db.session.commit()
       else:
