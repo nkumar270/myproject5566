@@ -1,6 +1,7 @@
 from flask import Flask, render_template, redirect,request,flash,url_for, current_app, session
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
+import random
 import pytz
 import os
 from sqlalchemy import ForeignKey, or_, func
@@ -502,11 +503,11 @@ def forgot_password():
       if user:
 
          msg = Message("Password Reset Request", sender=["By Nk"] ,recipients=[form_email])
-         msg.body=f"Hello {user.name}.\n\nYou requested a password reset. Uou new password is: 123 \n\nPlease keep it Secure."
+         msg.body=f"Hello {user.name}.\n\nYou requested a password reset. Uou new password is: {password} \n\nPlease keep it Secure."
          
          mail.send(msg)
          current_app.logger.info(f"mail is sent to you :")
-         password="123"
+         password=" ".join(random.choices("0#1$2%3*4@56789",k=4))
          user.password = password
          db.session.commit()
 
