@@ -281,6 +281,11 @@ def view1_book():
    books=Book.query.all()
    return render_template("view1.html",books=books)
 
+@library.route("/view2", methods=["GET","POST"])
+def view2():
+   books=Book.query.all()
+   return render_template("view2.html",books=books)
+
 @library.route('/update_book/<int:id>', methods=["GET", "POST"])
 def update_book(id):
     book = Book.query.get_or_404(id)
@@ -495,6 +500,11 @@ def view_student():
       students = Student.query.all()
    return render_template('view_student.html', students=students, q=q)
 
+@library.route("/view_student1", methods=["GET","POST"])
+def view_student1():
+   students=Student.query.all()
+   return render_template('view_student1.html', students=students)
+
 @library.route("/forgot_password", methods=["GET","POST"])
 def forgot_password():
    if request.method=="POST":
@@ -520,7 +530,6 @@ def forgot_password():
          return redirect(url_for("login"))
       
    return render_template("login.html")
-
 
 @library.route("/logout", methods=["GET","POST"])
 def logout():
