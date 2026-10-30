@@ -7,6 +7,8 @@ import os
 from sqlalchemy import ForeignKey, or_, func
 from flask_mail import Mail, Message 
 from dotenv import load_dotenv
+import resend
+
 
 
 load_dotenv()
@@ -20,7 +22,7 @@ library.config['MAIL_USE_SSL'] = os.getenv("MAIL_USE_SSL")=="True"
 library.config['MAIL_USERNAME'] = os.getenv("MAIL_USERNAME")
 library.config['MAIL_PASSWORD'] = os.getenv("MAIL_PASSWORD")
 library.config['MAIL_DEFAULT_SENDER'] = os.getenv("MAIL_DEFAULT_SENDER")
-
+resend.api_key =os.getenv("API_KEY")
 mail = Mail(library)
 
 
@@ -512,24 +514,33 @@ def forgot_password():
       user=users.query.filter_by(email=form_email).first()
       if user:
 
-         msg = Message("Password Reset Request", sender=["By Nk"] ,recipients=[form_email])
-         msg.body=f"Hello {user.name}.\n\nYou requested a password reset. Uou new password is: {password} \n\nPlease keep it Secure."
-         
-         mail.send(msg)
-         current_app.logger.info(f"mail is sent to you :")
-         password=" ".join(random.choices("0#1$2%3*4@56789",k=4))
+         password=" ".join(random.choices("0#1$2%3*4@56789", k=4))
          user.password = password
          db.session.commit()
 
+         try:
+            email_send={
+               "from": "Nk Library<onboarding@resend.dev>",
+               "to": [form_email],
+               "subject": "Password Reset Request",
+               "html": f"""
+               <p>Hello {user.name}.</p>
+               <p>You requested a password reset. Your new password is:<strong>{password}</strong></p>
+               """
+
+            } 
+
+            resend.Emails.send(email_send)
+            current_app.logger.info("Mail seccessfully sent.")
+         except Exception as e:
+            current_app. logger.error(f"Resend delivery failed: {str(e)}")
+            flash("There was an issue sending your email. Please try again. ")
+            return redirect(url_for("login"))
 
          flash("Password reset email sent :")
          return redirect(url_for("login"))
-      else:
-         current_app.logger.info(f"Email not found :")
-         flash("Email not found :")
-         return redirect(url_for("login"))
       
-   return render_template("login.html")
+   return render_template("login.html") 
 
 @library.route("/logout", methods=["GET","POST"])
 def logout():
