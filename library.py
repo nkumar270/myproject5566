@@ -513,11 +513,9 @@ def forgot_password():
       form_email = request.form.get("email")
       user=users.query.filter_by(email=form_email).first()
       if user:
-
          password=" ".join(random.choices("0#1$2%3*4@56789", k=4))
          user.password = password
          db.session.commit()
-
          try:
             email_send={
                "from": "Nk Library<onboarding@resend.dev>",
@@ -527,19 +525,15 @@ def forgot_password():
                <p>Hello {user.name}.</p>
                <p>You requested a password reset. Your new password is:<strong>{password}</strong></p>
                """
-
             } 
-
             resend.Emails.send(email_send)
             current_app.logger.info("Mail seccessfully sent.")
          except Exception as e:
             current_app. logger.error(f"Resend delivery failed: {str(e)}")
             flash("There was an issue sending your email. Please try again. ")
             return redirect(url_for("login"))
-
          flash("Password reset email sent :")
          return redirect(url_for("login"))
-      
    return render_template("login.html") 
 
 @library.route("/logout", methods=["GET","POST"])
