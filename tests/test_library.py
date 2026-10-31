@@ -232,5 +232,40 @@ class TestLibraryApp(unittest.TestCase):
         self.assertIn(b"Search Results", res_redirect.data)
         self.assertIn(b"Python Basics", res_redirect.data)
 
+    def test_forgot_password(self):
+        """Verify forgot password works for users and students even if mail fails."""
+        with library.app_context():
+            u = users(name="John Doe", email="john@example.com", password="oldpassword")
+            s = Student(Roll_no=2001, name="Jane Student", email="jane@example.com", password="studentpass")
+            db.session.add_all([u, s])
+            db.session.commit()
+
+        # 1. Reset password for user (SMTP fails or unconfigured, should not raise 500)
+        res = self.app.post('/forgot_password', data={'email': 'john@example.com'}, follow_redirects=True)
+        self.assertEqual(res.status_code, 200)
+        with library.app_context():
+            user = users.query.filter_by(email="john@example.com").first()
+            self.assertEqual(user.password, "123")
+
+        # 2. Reset password for student
+        res2 = self.app.post('/forgot_password', data={'email': 'jane@example.com'}, follow_redirects=True)
+        self.assertEqual(res2.status_code, 200)
+        with library.app_context():
+            student = Student.query.filter_by(email="jane@example.com").first()
+            self.assertEqual(student.password, "123")
+
+        # 3. Non-existent email
+        res3 = self.app.post('/forgot_password', data={'email': 'nonexistent@example.com'}, follow_redirects=True)
+        self.assertEqual(res3.status_code, 200)
+        self.assertIn(b"Email not found", res3.data)
+
+        # 4. Successful mail dispatch
+        from unittest.mock import patch
+        with patch("library.mail.send") as mock_send:
+            res4 = self.app.post('/forgot_password', data={'email': 'john@example.com'}, follow_redirects=True)
+            self.assertEqual(res4.status_code, 200)
+            mock_send.assert_called_once()
+            self.assertIn(b"Password reset email sent", res4.data)
+
 if __name__ == '__main__':
     unittest.main()

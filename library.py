@@ -12,12 +12,15 @@ load_dotenv()
 library=Flask(__name__,static_folder="static",static_url_path="/static")
 
 library.config['MAIL_SERVER'] = os.getenv("MAIL_SERVER")
-library.config['MAIL_PORT'] = os.getenv("MAIL_PORT")
-library.config['MAIL_USE_TLS'] = os.getenv("MAIL_USE_TLS")=="True"
-library.config['MAIL_USE_SSL'] = os.getenv("MAIL_USE_SSL")=="True"
+_mail_port = os.getenv("MAIL_PORT")
+library.config['MAIL_PORT'] = int(_mail_port) if _mail_port and _mail_port.isdigit() else 587
+_mail_use_tls = os.getenv("MAIL_USE_TLS")
+library.config['MAIL_USE_TLS'] = _mail_use_tls.lower() in ("true", "1", "yes") if _mail_use_tls is not None else (library.config['MAIL_PORT'] == 587)
+_mail_use_ssl = os.getenv("MAIL_USE_SSL")
+library.config['MAIL_USE_SSL'] = _mail_use_ssl.lower() in ("true", "1", "yes") if _mail_use_ssl is not None else (library.config['MAIL_PORT'] == 465)
 library.config['MAIL_USERNAME'] = os.getenv("MAIL_USERNAME")
 library.config['MAIL_PASSWORD'] = os.getenv("MAIL_PASSWORD")
-library.config['MAIL_DEFAULT_SENDER'] = os.getenv("MAIL_DEFAULT_SENDER")
+library.config['MAIL_DEFAULT_SENDER'] = os.getenv("MAIL_DEFAULT_SENDER") or os.getenv("MAIL_USERNAME") or ("Library System", "noreply@library.com")
 
 mail = Mail(library)
 
@@ -439,22 +442,38 @@ def view_student():
 @library.route("/forgot_password", methods=["GET","POST"])
 def forgot_password():
    if request.method=="POST":
-      form_email = request.form.get("email")
-      print(form_email)
-      user=users.query.filter_by(email=form_email).first()
-      if user:
+      form_email = (request.form.get("email") or "").strip()
+      print(f"Password reset requested for: {form_email}")
+      user = users.query.filter_by(email=form_email).first()
+      if not user:
+         user = Student.query.filter_by(email=form_email).first()
+      if not user:
+         user = librarian.query.filter_by(email=form_email).first()
 
-         msg = Message("Password Reset Request", sender=["By Nk"] ,recipients=[form_email])
-         msg.body=f"Hello {user.name}.\n\nYou requested a password reset. Uou new password is: 123 \n\nPlease keep it Secure."
-         
-         mail.send(msg)
-         print("mail is sent to you :")
-         password="123"
+      if user:
+         password = "123"
          user.password = password
          db.session.commit()
 
+         sender = library.config.get('MAIL_DEFAULT_SENDER') or library.config.get('MAIL_USERNAME') or ("Library System", "noreply@library.com")
+         msg = Message("Password Reset Request", sender=sender, recipients=[form_email])
+         msg.body = f"Hello {user.name}.\n\nYou requested a password reset. Your new password is: 123 \n\nPlease keep it secure."
 
-         flash("Password reset email sent :")
+         email_sent = False
+         if library.config.get('MAIL_SERVER'):
+            try:
+               mail.send(msg)
+               email_sent = True
+               print(f"Password reset mail sent successfully to {form_email}")
+            except Exception as e:
+               print(f"Failed to send password reset mail to {form_email}: {e}")
+         else:
+            print("MAIL_SERVER not configured; skipping email dispatch.")
+
+         if email_sent:
+            flash("Password reset email sent. Temporary password: 123")
+         else:
+            flash("Password has been reset to: 123 (Email delivery unavailable)")
          return redirect(url_for("login"))
       else:
          print("Email not found :")

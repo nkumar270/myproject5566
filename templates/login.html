@@ -32,24 +32,22 @@
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="exampleModalLabel">Enter Your Register Email</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-            <form method="POST" action="{{url_for('forgot_password')}}">
-           <div class="mb-3">
-             <label for="exampleInputEmail1" class="form-label">Email address</label>
-               <input type="email" class="form-control" name="email" aria-describedby="emailHelp">
-           </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
-            </form>
-           </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="submit" class="btn btn-primary">Send New Password</button>
-      </div>
+      <form method="POST" action="{{url_for('forgot_password')}}">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Enter Your Registered Email</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="forgotPasswordEmail" class="form-label">Email address</label>
+            <input type="email" class="form-control" id="forgotPasswordEmail" name="email" aria-describedby="emailHelp" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Send New Password</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
