@@ -8,6 +8,7 @@ os.environ["SECRET_KEY"] = "test-secret-key"
 os.environ["MAIL_SERVER"] = "localhost"
 os.environ["MAIL_PORT"] = "8025"
 
+from unittest.mock import patch
 from library import library, db, Book, Student, IssueBook, users, librarian
 from datetime import datetime, timedelta
 
@@ -231,6 +232,50 @@ class TestLibraryApp(unittest.TestCase):
         res_redirect = self.app.get('/?q=Python', follow_redirects=True)
         self.assertIn(b"Search Results", res_redirect.data)
         self.assertIn(b"Python Basics", res_redirect.data)
+
+    def test_forgot_password_success(self):
+        """Verify successful password reset sends email and updates password."""
+        with library.app_context():
+            u = users(name="Alice", email="alice@test.com", password="original_password")
+            db.session.add(u)
+            db.session.commit()
+
+        with patch('resend.Emails.send') as mock_send:
+            mock_send.return_value = {"id": "test_id"}
+            response = self.app.post('/forgot_password', data={"email": "alice@test.com"}, follow_redirects=True)
+            self.assertEqual(response.status_code, 200)
+            self.assertIn(b"Password reset email sent", response.data)
+            self.assertTrue(mock_send.called)
+            sent_args = mock_send.call_args[0][0]
+            self.assertEqual(sent_args["to"], ["alice@test.com"])
+            self.assertEqual(sent_args["subject"], "Password Reset Request")
+
+        with library.app_context():
+            updated_user = users.query.filter_by(email="alice@test.com").first()
+            self.assertNotEqual(updated_user.password, "original_password")
+            self.assertEqual(len(updated_user.password), 8)
+
+    def test_forgot_password_user_not_found(self):
+        """Verify non-existent email handles gracefully."""
+        response = self.app.post('/forgot_password', data={"email": "nonexistent@test.com"}, follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"No account found with this email", response.data)
+
+    def test_forgot_password_resend_failure(self):
+        """Verify password is rolled back if resend raises an error."""
+        with library.app_context():
+            u = users(name="Bob", email="bob@test.com", password="bob_original_password")
+            db.session.add(u)
+            db.session.commit()
+
+        with patch('resend.Emails.send', side_effect=Exception("API Error")):
+            response = self.app.post('/forgot_password', data={"email": "bob@test.com"}, follow_redirects=True)
+            self.assertEqual(response.status_code, 200)
+            self.assertIn(b"There was an issue sending your email", response.data)
+
+        with library.app_context():
+            user = users.query.filter_by(email="bob@test.com").first()
+            self.assertEqual(user.password, "bob_original_password")
 
 if __name__ == '__main__':
     unittest.main()

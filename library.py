@@ -26,7 +26,10 @@ resend.api_key =os.getenv("API_KEY")
 mail = Mail(library)
 
 
-library.config["SQLALCHEMY_DATABASE_URI"]= os.getenv("DATABASE_URL") or "sqlite:///data.db"
+database_url = os.getenv("DATABASE_URL")
+if database_url and database_url.startswith("postgres://"):
+    database_url = database_url.replace("postgres://", "postgresql://", 1)
+library.config["SQLALCHEMY_DATABASE_URI"] = database_url or "sqlite:///data.db"
 library.config["SQLALCHEMY_TRACK_MODIFICATIONS"]=False
 
 library.secret_key = os.getenv("SECRET_KEY") or "super-secret-key"
@@ -512,29 +515,35 @@ def forgot_password():
    if request.method=="POST":
       form_email = request.form.get("email")
       user=users.query.filter_by(email=form_email).first()
-      if user:
-         password=" ".join(random.choices("0#1$2%3*4@56789", k=4))
-         user.password = password
-         db.session.commit()
-         try:
-            resend.apy_key=os.getenv("API_KEY")
-            email_send={
-               "from": "Nk Library<onboarding@resend.dev>",
-               "to": [form_email],
-               "subject": "Password Reset Request",
-               "html": f"""
-               <p>Hello {user.name}.</p>
-               <p>You requested a password reset. Your new password is:<strong>{password}</strong></p>
-               """
-            } 
-            resend.Emails.send(email_send)
-            current_app.logger.info("Mail seccessfully sent.")
-         except Exception as e:
-            current_app. logger.error(f"Resend delivery failed: {str(e)}")
-            flash("There was an issue sending your email. Please try again. ")
-            return redirect(url_for("login"))
-         flash("Password reset email sent :")
+      if not user:
+         flash("No account found with this email :")
          return redirect(url_for("login"))
+
+      password = "".join(random.choices("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", k=8))
+      old_password = user.password
+      user.password = password
+      db.session.commit()
+      try:
+         resend.api_key = os.getenv("API_KEY")
+         email_send={
+            "from": "Nk Library<onboarding@resend.dev>",
+            "to": [form_email],
+            "subject": "Password Reset Request",
+            "html": f"""
+            <p>Hello {user.name},</p>
+            <p>You requested a password reset. Your new password is: <strong>{password}</strong></p>
+            """
+         }
+         resend.Emails.send(email_send)
+         current_app.logger.info("Mail successfully sent.")
+      except Exception as e:
+         current_app.logger.error(f"Resend delivery failed: {str(e)}")
+         user.password = old_password
+         db.session.commit()
+         flash("There was an issue sending your email. Please try again.")
+         return redirect(url_for("login"))
+      flash("Password reset email sent :")
+      return redirect(url_for("login"))
    return render_template("login.html") 
 
 @library.route("/logout", methods=["GET","POST"])
