@@ -517,6 +517,7 @@ def forgot_password():
          user.password = password
          db.session.commit()
          try:
+            resend.apy_key=os.getenv("API_KEY")
             email_send={
                "from": "Nk Library<onboarding@resend.dev>",
                "to": [form_email],
